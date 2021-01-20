@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   },
   touchable: {
     overflow: "hidden",
+    // 여기다가 동일한 Radius 값을 줘야 한다.
     borderRadius: 10,
   },
   imageContainer: {
