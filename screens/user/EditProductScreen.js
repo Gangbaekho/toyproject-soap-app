@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import HeaderButton from "../../components/UI/HeaderButton";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import * as productsActions from "../../store/actions/products";
 
 const EditProductScreen = (props) => {
   const prodId = props.navigation.getParam("productId");
@@ -26,13 +27,23 @@ const EditProductScreen = (props) => {
     editedProduct ? editedProduct.description : ""
   );
 
-  const submutHandler = useCallback(() => {
-    console.log("Submitting");
-  }, []);
+  const submitHandler = useCallback(() => {
+    if (editedProduct) {
+      dispatch(
+        productsActions.updateProduct(prodId, title, description, imageUrl)
+      );
+    } else {
+      dispatch(
+        productsActions.createProduct(title, description, imageUrl, +price)
+      );
+    }
+  }, [title, description, imageUrl, price, dispatch, prodId]);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     props.navigation.setParams({ submit: submitHandler });
-  }, [submutHandler]);
+  }, [submitHandler]);
 
   return (
     <ScrollView>
@@ -43,6 +54,23 @@ const EditProductScreen = (props) => {
             style={StyleSheet.input}
             value={title}
             onChange={(text) => setTitle(text)}
+            // keyboardType 이라는 것이 있는데
+            // 이것에 대한 더 정확한 설명은 Docs를 참고해라
+            // TextInput 들어가면은 쓸 수 있는  props를 정리해놓았을 것이다.
+            keyboardType="default"
+            autoCapitalize="sentences"
+            // autoCorrect는 뭔지 잘 모르겠네
+            // Docs를 참고하자.
+            autoCorrect
+            // 이건 여러 InputText가 있을떄,
+            // 그 다음으로 자동으로 Focus 되는 기능을
+            // 말하는 듯, default 는 return이라는 것 같다.
+            returnKeyType="next"
+            // 이건 다음 끝났을떄 발동하는 것이다.
+            // on 치고 control + spacebar를 누르면 다양한
+            // Event들을 확인할 수 있으니 나중에 가지고 놀아보자.
+            onEndEditing={() => console.log("onEndEditing")}
+            onSubmitEditing={() => console.log("onSubmitEditing")}
           />
         </View>
         <View style={styles.formControl}>
@@ -60,6 +88,9 @@ const EditProductScreen = (props) => {
               style={StyleSheet.input}
               value={price}
               onChange={(text) => setPrice(text)}
+              // 이걸 쓰면은 숫자만 쓸 수 있는
+              // 그런 키보드를 보여준다는 것이다.
+              keyboardType="decimal-pad"
             />
           </View>
         )}
