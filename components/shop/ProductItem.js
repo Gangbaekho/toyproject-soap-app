@@ -20,15 +20,8 @@ const ProductItem = (props) => {
 
   return (
     <View style={styles.product}>
-      {/*
-       흠 이상하게 View로 한번 더 묶음.
-        왜 이렇게 했는지는 잘 모르겠다.
-      */}
       <View style={styles.touchable}>
-        <TouchableComponent onPress={props.onViewDetail} useForeground>
-          {/* 이 밑에 있는 View를 통해서
-          TouchableComponent 안에는 하나의 Child만 있도록 만들었다.
-          이것 또한 왜 그렇게 했는지는 잘 모르겠다. */}
+        <TouchableComponent onPress={props.onSelect} useForeground>
           <View>
             <View style={styles.imageContainer}>
               <Image style={styles.image} source={{ uri: props.image }} />
@@ -37,18 +30,7 @@ const ProductItem = (props) => {
               <Text style={styles.title}>{props.title}</Text>
               <Text style={styles.price}>${props.price.toFixed(2)}</Text>
             </View>
-            <View style={styles.actions}>
-              <Button
-                color={Colors.primary}
-                title="View Details"
-                onPress={props.onViewDetail}
-              />
-              <Button
-                color={Colors.primary}
-                title="To Cart"
-                onPress={props.onAddToCart}
-              />
-            </View>
+            <View style={styles.actions}>{props.children}</View>
           </View>
         </TouchableComponent>
       </View>
@@ -58,11 +40,6 @@ const ProductItem = (props) => {
 
 const styles = StyleSheet.create({
   product: {
-    // shadowColor: "black",
-    // shadowOpacity: 0.26,
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowRadius: 8,
-    // elevation: 10,
     borderRadius: 10,
     borderColor: "white",
     height: 300,
@@ -70,7 +47,6 @@ const styles = StyleSheet.create({
   },
   touchable: {
     overflow: "hidden",
-    // 여기다가 동일한 Radius 값을 줘야 한다.
     borderRadius: 10,
   },
   imageContainer: {
