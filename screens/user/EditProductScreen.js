@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import HeaderButton from "../../components/UI/HeaderButton";
@@ -19,6 +20,7 @@ const EditProductScreen = (props) => {
   );
 
   const [title, setTitle] = useState(editedProduct ? editedProduct.title : "");
+  const [titleIsValid, setTitleIsValid] = useState(false);
   const [imageUrl, setImageUrl] = useState(
     editedProduct ? editedProduct.imageUrl : ""
   );
@@ -28,6 +30,17 @@ const EditProductScreen = (props) => {
   );
 
   const submitHandler = useCallback(() => {
+    // 뭐 이런식으로 submitHandler에서 처리를 할 수도 있겠찌
+    // 어디서 하든간에 그건 마음이다.
+    // validate.js를 쓰면 좀 더 상세하게
+    // valid check를 할 수 있다는 것. 이거는 그냥 보너스니까
+    // 나중에 한번 훑어보면은 좋을 듯 하다.
+    if (!titleIsValid) {
+      Alert.alert("Wrong input!", "Please check the errors in the form", [
+        { text: "Okay" },
+      ]);
+      return;
+    }
     if (editedProduct) {
       dispatch(
         productsActions.updateProduct(prodId, title, description, imageUrl)
@@ -45,6 +58,15 @@ const EditProductScreen = (props) => {
     props.navigation.setParams({ submit: submitHandler });
   }, [submitHandler]);
 
+  const titleChangeHandler = (text) => {
+    if (text.trim().length === 0) {
+      setTitleIsValid(false);
+    } else {
+      setTitleIsValid(true);
+    }
+    setTitle(text);
+  };
+
   return (
     <ScrollView>
       <View style={styles.form}>
@@ -53,25 +75,19 @@ const EditProductScreen = (props) => {
           <TextInput
             style={StyleSheet.input}
             value={title}
-            onChange={(text) => setTitle(text)}
-            // keyboardType 이라는 것이 있는데
-            // 이것에 대한 더 정확한 설명은 Docs를 참고해라
-            // TextInput 들어가면은 쓸 수 있는  props를 정리해놓았을 것이다.
+            onChange={titleChangeHandler}
             keyboardType="default"
             autoCapitalize="sentences"
-            // autoCorrect는 뭔지 잘 모르겠네
-            // Docs를 참고하자.
             autoCorrect
-            // 이건 여러 InputText가 있을떄,
-            // 그 다음으로 자동으로 Focus 되는 기능을
-            // 말하는 듯, default 는 return이라는 것 같다.
             returnKeyType="next"
-            // 이건 다음 끝났을떄 발동하는 것이다.
-            // on 치고 control + spacebar를 누르면 다양한
-            // Event들을 확인할 수 있으니 나중에 가지고 놀아보자.
             onEndEditing={() => console.log("onEndEditing")}
             onSubmitEditing={() => console.log("onSubmitEditing")}
           />
+          {/* 
+          Valid 하지 않았을떄는 특정 문구를 띄어주는 식으로
+          로직을 짠 것이다.
+           */}
+          {!titleIsValid && <Text>Please enter a valid title!</Text>}
         </View>
         <View style={styles.formControl}>
           <Text style={styles.label}>Image URL</Text>
@@ -88,8 +104,6 @@ const EditProductScreen = (props) => {
               style={StyleSheet.input}
               value={price}
               onChange={(text) => setPrice(text)}
-              // 이걸 쓰면은 숫자만 쓸 수 있는
-              // 그런 키보드를 보여준다는 것이다.
               keyboardType="decimal-pad"
             />
           </View>
