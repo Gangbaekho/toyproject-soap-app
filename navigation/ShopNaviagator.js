@@ -48,8 +48,6 @@ const OrdersNavigator = createStackNavigator(
     Orders: OrdersScreen,
   },
   {
-    // Drawer Navigator에다가 각각의 Stack Navigator의
-    // 아이콘을 설정해주기 위해서는 여기다가 아래와 같은 설정을 하면 된다는 것이다.
     navigationOptions: {
       drawerIcon: (drawerConfig) => (
         <Ionicons
