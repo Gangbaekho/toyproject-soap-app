@@ -25,23 +25,28 @@ const ProductsOverviewScreen = (props) => {
 
   const dispatch = useDispatch();
 
-  // 이걸 따로 뻇다
-  // Try again 에서 다시 사용할거라서
-  // 그냥 재활용 하는 것이다.
   const loadProducts = useCallback(async () => {
     setError(null);
     setIsLoading(true);
     try {
       await dispatch(productsActions.fetchProducts());
     } catch (err) {
-      // 던져주는 err에는 message라는 property가 있나보다.
       setError(err.message);
     }
     setIsLoading(false);
   }, [dispatch, setIsLoading, setError]);
 
-  // useEffect 자체에는 async await를 쓸 수 없으니까
-  // 요행을 부려서 아래와 같이 작성할 수 있다.
+  useEffect(() => {
+    const willFocusSub = props.navigation.addListener(
+      "willFocus",
+      loadProducts
+    );
+
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadProducts]);
+
   useEffect(() => {
     loadProducts();
   }, [dispatch, loadProducts]);
@@ -57,9 +62,6 @@ const ProductsOverviewScreen = (props) => {
     return (
       <View style={styles.centered}>
         <Text>An error occurred!</Text>
-        {/* 
-        누르면 다시 fetch하는 그런 로직을 짠 것임 
-        */}
         <Button
           title="Try Again!"
           onPress={loadProducts}

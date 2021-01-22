@@ -12,9 +12,7 @@ export const fetchProducts = () => {
         "https://rn-complete-guide-e74de-default-rtdb.firebaseio.com/products.json"
       );
 
-      // 이게 Response 200 뭐 이런거 체크하는 방법인가보다.
       if (!response.ok) {
-        // 뭐 여기에다가 적절한 Error handling을 넣어주면 된다.
         throw new Error("Something went wrong!");
       }
 
@@ -35,10 +33,6 @@ export const fetchProducts = () => {
       }
       dispatch({ type: SET_PRODUCTS, products: loadedProducts });
     } catch (err) {
-      // 뭐 이런식으로 error 처리를 하면 된다.
-      // 아니면은 then.cath 뭐 이런식으로 해도 되고
-      // 여기는 async 와 await를 이용했기 떄문에
-      // 이런 try catch문을 썼다는 것이지.
       throw err;
     }
   };
