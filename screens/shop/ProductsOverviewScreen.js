@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,17 @@ import * as cartActions from "../../store/actions/cart";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import HeaderButton from "../../components/UI/HeaderButton";
 import Colors from "../../constants/Colors";
+import * as productsActions from "../../store/actions/products";
 
 const ProductsOverviewScreen = (props) => {
   const products = useSelector((state) => state.products.availableProducts);
 
   const dispatch = useDispatch();
+
+  // 일단은 화면이 켜질떄 바로 fetch 하도록 만든 것임.
+  useEffect(() => {
+    dispatch(productsActions.fetchProducts());
+  }, [dispatch]);
 
   const selectItemHandler = (id, title) => {
     props.navigation.navigate("ProductDetail", {
