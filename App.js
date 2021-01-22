@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { createStore, combineReducers } from "redux";
+// redux thunk를 사용하려면은 applyMiddleware를 사용해야 한다.
+import { createStore, combineReducers, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import ShopNavigator from "./navigation/ShopNaviagator";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
+// 이거까지 import를 해준다음에.
+import ReduxThunk from "redux-thunk";
 
 import productsReducer from "./store/reducers/products";
 import cartReducer from "./store/reducers/cart";
@@ -15,7 +18,8 @@ const rootReducer = combineReducers({
   orders: orderReducer,
 });
 
-const store = createStore(rootReducer);
+// 이렇게 store를 만들 때 , 이걸 적용해 주면 된다는 것임.
+const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 
 const fetchFonts = () => {
   return Font.loadAsync({

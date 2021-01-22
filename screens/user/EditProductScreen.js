@@ -6,11 +6,11 @@ import {
   TextInput,
   StyleSheet,
   Platform,
-  Alert,
 } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import HeaderButton from "../../components/UI/HeaderButton";
 import { useSelector, useDispatch } from "react-redux";
+
+import HeaderButton from "../../components/UI/HeaderButton";
 import * as productsActions from "../../store/actions/products";
 
 const EditProductScreen = (props) => {
@@ -18,9 +18,9 @@ const EditProductScreen = (props) => {
   const editedProduct = useSelector((state) =>
     state.products.userProducts.find((prod) => prod.id === prodId)
   );
+  const dispatch = useDispatch();
 
   const [title, setTitle] = useState(editedProduct ? editedProduct.title : "");
-  const [titleIsValid, setTitleIsValid] = useState(false);
   const [imageUrl, setImageUrl] = useState(
     editedProduct ? editedProduct.imageUrl : ""
   );
@@ -30,17 +30,6 @@ const EditProductScreen = (props) => {
   );
 
   const submitHandler = useCallback(() => {
-    // 뭐 이런식으로 submitHandler에서 처리를 할 수도 있겠찌
-    // 어디서 하든간에 그건 마음이다.
-    // validate.js를 쓰면 좀 더 상세하게
-    // valid check를 할 수 있다는 것. 이거는 그냥 보너스니까
-    // 나중에 한번 훑어보면은 좋을 듯 하다.
-    if (!titleIsValid) {
-      Alert.alert("Wrong input!", "Please check the errors in the form", [
-        { text: "Okay" },
-      ]);
-      return;
-    }
     if (editedProduct) {
       dispatch(
         productsActions.updateProduct(prodId, title, description, imageUrl)
@@ -50,70 +39,48 @@ const EditProductScreen = (props) => {
         productsActions.createProduct(title, description, imageUrl, +price)
       );
     }
-  }, [title, description, imageUrl, price, dispatch, prodId]);
-
-  const dispatch = useDispatch();
+    props.navigation.goBack();
+  }, [dispatch, prodId, title, description, imageUrl, price]);
 
   useEffect(() => {
     props.navigation.setParams({ submit: submitHandler });
   }, [submitHandler]);
 
-  const titleChangeHandler = (text) => {
-    if (text.trim().length === 0) {
-      setTitleIsValid(false);
-    } else {
-      setTitleIsValid(true);
-    }
-    setTitle(text);
-  };
-
   return (
     <ScrollView>
       <View style={styles.form}>
         <View style={styles.formControl}>
-          <Text style={styles.label}>TITLE</Text>
+          <Text style={styles.label}>Title</Text>
           <TextInput
-            style={StyleSheet.input}
+            style={styles.input}
             value={title}
-            onChange={titleChangeHandler}
-            keyboardType="default"
-            autoCapitalize="sentences"
-            autoCorrect
-            returnKeyType="next"
-            onEndEditing={() => console.log("onEndEditing")}
-            onSubmitEditing={() => console.log("onSubmitEditing")}
+            onChangeText={(text) => setTitle(text)}
           />
-          {/* 
-          Valid 하지 않았을떄는 특정 문구를 띄어주는 식으로
-          로직을 짠 것이다.
-           */}
-          {!titleIsValid && <Text>Please enter a valid title!</Text>}
         </View>
         <View style={styles.formControl}>
           <Text style={styles.label}>Image URL</Text>
           <TextInput
-            style={StyleSheet.input}
+            style={styles.input}
             value={imageUrl}
-            onChange={(text) => setImageUrl(text)}
+            onChangeText={(text) => setImageUrl(text)}
           />
         </View>
         {editedProduct ? null : (
           <View style={styles.formControl}>
             <Text style={styles.label}>Price</Text>
             <TextInput
-              style={StyleSheet.input}
+              style={styles.input}
               value={price}
-              onChange={(text) => setPrice(text)}
-              keyboardType="decimal-pad"
+              onChangeText={(text) => setPrice(text)}
             />
           </View>
         )}
         <View style={styles.formControl}>
           <Text style={styles.label}>Description</Text>
           <TextInput
-            style={StyleSheet.input}
+            style={styles.input}
             value={description}
-            onChange={(text) => setDescription(text)}
+            onChangeText={(text) => setDescription(text)}
           />
         </View>
       </View>
@@ -122,10 +89,10 @@ const EditProductScreen = (props) => {
 };
 
 EditProductScreen.navigationOptions = (navData) => {
-  const submitFunction = navData.navigation.getParam("submit");
+  const submitFn = navData.navigation.getParam("submit");
   return {
     headerTitle: navData.navigation.getParam("productId")
-      ? "Edit Product "
+      ? "Edit Product"
       : "Add Product",
     headerRight: (
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -134,7 +101,7 @@ EditProductScreen.navigationOptions = (navData) => {
           iconName={
             Platform.OS === "android" ? "md-checkmark" : "ios-checkmark"
           }
-          onPress={submitFunction}
+          onPress={submitFn}
         />
       </HeaderButtons>
     ),
@@ -156,7 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     paddingVertical: 5,
     borderBottomColor: "#ccc",
-    borderBottomWidth: 2,
+    borderBottomWidth: 1,
   },
 });
 
