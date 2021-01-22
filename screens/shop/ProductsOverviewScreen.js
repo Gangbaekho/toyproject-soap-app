@@ -20,6 +20,7 @@ import * as productsActions from "../../store/actions/products";
 
 const ProductsOverviewScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
   const products = useSelector((state) => state.products.availableProducts);
 
@@ -27,13 +28,13 @@ const ProductsOverviewScreen = (props) => {
 
   const loadProducts = useCallback(async () => {
     setError(null);
-    setIsLoading(true);
+    setIsRefreshing(true);
     try {
       await dispatch(productsActions.fetchProducts());
     } catch (err) {
       setError(err.message);
     }
-    setIsLoading(false);
+    setIsRefreshing(false);
   }, [dispatch, setIsLoading, setError]);
 
   useEffect(() => {
@@ -48,7 +49,10 @@ const ProductsOverviewScreen = (props) => {
   }, [loadProducts]);
 
   useEffect(() => {
-    loadProducts();
+    setIsLoading(true);
+    loadProducts().then(() => {
+      setIsLoading(false);
+    });
   }, [dispatch, loadProducts]);
 
   const selectItemHandler = (id, title) => {
@@ -88,6 +92,13 @@ const ProductsOverviewScreen = (props) => {
   }
   return (
     <FlatList
+      // 이게 User가 Pull screen을 할 때 발동되는 그런
+      // callback 함수라고 생각을 하면 된다.
+      // 그래서 그냥 loadProducts 넣어주면 끝이지..
+      onRefresh={loadProducts}
+      // 근데 위에 하나만 설정을 하면은 Error가 나기 떄문에
+      // refreshing 이라는 property를 하나 더 두면 된다.
+      refreshing={isRefreshing}
       keyExtractor={(item) => item.id}
       data={products}
       renderItem={(itemData) => (
