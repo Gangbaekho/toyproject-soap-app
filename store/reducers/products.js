@@ -14,7 +14,6 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    // 이걸 추가했다.
     case SET_PRODUCTS:
       return {
         availableProducts: action.products,

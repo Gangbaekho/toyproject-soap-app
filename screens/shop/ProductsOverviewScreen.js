@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   FlatList,
   Platform,
   Button,
+  // Loading Spinner를 사용하려면은
+  // 이걸 import 해주면 된다는 것을 알면 된다.
+  ActivityIndicator,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import ProductItem from "../../components/shop/ProductItem";
@@ -16,14 +19,32 @@ import Colors from "../../constants/Colors";
 import * as productsActions from "../../store/actions/products";
 
 const ProductsOverviewScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
   const products = useSelector((state) => state.products.availableProducts);
 
   const dispatch = useDispatch();
 
-  // 일단은 화면이 켜질떄 바로 fetch 하도록 만든 것임.
+  // 이걸 따로 뻇다
+  // Try again 에서 다시 사용할거라서
+  // 그냥 재활용 하는 것이다.
+  const loadProducts = useCallback(async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(productsActions.fetchProducts());
+    } catch (err) {
+      // 던져주는 err에는 message라는 property가 있나보다.
+      setError(err.message);
+    }
+    setIsLoading(false);
+  }, [dispatch, setIsLoading, setError]);
+
+  // useEffect 자체에는 async await를 쓸 수 없으니까
+  // 요행을 부려서 아래와 같이 작성할 수 있다.
   useEffect(() => {
-    dispatch(productsActions.fetchProducts());
-  }, [dispatch]);
+    loadProducts();
+  }, [dispatch, loadProducts]);
 
   const selectItemHandler = (id, title) => {
     props.navigation.navigate("ProductDetail", {
@@ -32,6 +53,37 @@ const ProductsOverviewScreen = (props) => {
     });
   };
 
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text>An error occurred!</Text>
+        {/* 
+        누르면 다시 fetch하는 그런 로직을 짠 것임 
+        */}
+        <Button
+          title="Try Again!"
+          onPress={loadProducts}
+          color={Colors.primary}
+        />
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  if (!isLoading && products.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text>No products found. Maybe start adding some.</Text>
+      </View>
+    );
+  }
   return (
     <FlatList
       keyExtractor={(item) => item.id}
@@ -92,9 +144,11 @@ ProductsOverviewScreen.navigationOptions = (navData) => {
 };
 
 const styles = StyleSheet.create({
-  // screen: {
-  //   flex: 1,
-  // },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default ProductsOverviewScreen;
